@@ -16,6 +16,9 @@ import pylast
 
 # TODO loved pas sur spotify ?
 
+# TODO detecter album lus entier
+
+# TODO proportion de love des albums >= 50
 
 #def load_secrets_from_yaml():
 #    secrets_file = "pylast.yaml"
@@ -51,7 +54,7 @@ def has_tag(tag, tags):
   found = False
   if len(tags) > 0:
     for t in tags:
-      if t.name == tag:
+      if t.get_name().lower() == tag:
         found = True
         break
   return found
@@ -124,6 +127,8 @@ if __name__ == '__main__':
   for top_album in top_albums:
     print "Album: " + top_album.item.get_title()
     album_tags = top_album.item.get_tags()
+    print "Tags "
+    print album_tags
     if has_tag(marker_tag, album_tags):
         print "Found " + marker_tag
     else:
