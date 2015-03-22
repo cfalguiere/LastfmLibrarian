@@ -29,7 +29,6 @@ def load_secrets_from_env():
         return doc
 
 def login(secrets):
-
       USERNAME = secrets["username"]
       PASSWORD_HASH = secrets["password_hash"]
 
@@ -41,35 +40,70 @@ def login(secrets):
         username=USERNAME, password_hash=PASSWORD_HASH)
       return network
 
+def has_tag(tag, tags):
+  found = False
+  if len(tags) > 0:
+    for t in tags:
+      if t.name == tag:
+        found = True
+        break
+  return found
+
+## Parameters
+
+
+## Main
+
 secrets = None
 secrets = load_secrets_from_env()
 username = secrets["username"]
-print username
+print "User: " + username
 
 network = login(secrets)
-
 library = pylast.Library(user=username, network=network)
 
 
+artist_name =  "System of a Down"
+
 # now you can use that object every where
-artist = network.get_artist("System of a Down")
+artist = network.get_artist(artist_name)
 #artist.shout("<3")
-print artist
+print "Artist: " + artist.name
+
+marker_tag = "albums i have listened"
+missing_tag = "missing track"
 
 top_albums = artist.get_top_albums(limit=1)
 for top_album in top_albums:
-  print top_album.item
-#  album = network.get_album(artist, top_album)
+  print "Album: " + top_album.item.get_title()
+  album_tags = top_album.item.get_tags()
+  if has_tag(marker_tag, album_tags):
+      print "Found " + marker_tag
+
   album_tracks = top_album.item.get_tracks()
-  for track1 in album_tracks:
-    print track1.get_title()
+  recommended_tracks = {};
+  for track in album_tracks:
+    track_tags = track.get_tags()
+    print "Track: " + track.get_title()
+    if not has_tag(missing_tag, track_tags):
+      recommended_tracks[track.get_title()] = track
+
+  print "=== candidate album tracks ==="
+  print recommended_tracks.keys()
+
   print "=== listened ==="
-  listened_tracks = library.get_tracks(artist=artist, album=top_album.item.get_title())
-  for track2 in listened_tracks:
-    print track2.item.get_title()
-    print track2.playcount
-    #count = track2.item.get_userplaycount()
-    #print count
+  user_tracks = library.get_tracks(artist=artist, album=top_album.item.get_title())
+  for user_track in user_tracks:
+    if user_track.playcount > 0:
+        print "removing " + user_track.item.get_title()
+        del recommended_tracks[user_track.item.get_title()]
+
+  print "=== recommended ==="
+  print recommended_tracks.keys()
+  print "=== tagging ==="
+  for rec_title, rec_track in recommended_tracks.iteritems():
+    print "tagging " + rec_title
+    rec_track.add_tag(missing_tag)
 
 #track = network.get_track("Iron Maiden", "The Nomad")
 #track.love()
