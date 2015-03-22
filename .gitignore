@@ -52,3 +52,10 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# vagrant temp files
+*.vagrant/
+
+# user credentials
+my_setup_user.bash
+
