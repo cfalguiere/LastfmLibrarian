@@ -59,8 +59,71 @@ def has_tag(tag, tags):
         break
   return found
 
+def recommended_tracks_for_top10(artist):
+
+    top_10 = artist.get_top_tracks(limit=10)
+
+    recommended_tracks = {};
+    for track in top_10:
+      track_tags = track.item.get_tags()
+      #print "Track: " + track.item.get_title()
+      if not has_tag(missing_tag, track_tags):
+        #print "adding " + track.item.get_title()
+        recommended_tracks[track.item.get_title()] = track.item
+      else:
+        print missing_tag + "Found"
+        break
+
+    if len(recommended_tracks) > 0:
+      user_tracks = library.get_tracks(artist=artist)
+      for user_track in user_tracks:
+        if user_track.item.get_title()  in recommended_tracks:
+          if user_track.playcount > 0:
+            #print "removing " + user_track.item.get_title()
+            del recommended_tracks[user_track.item.get_title()]
+
+    print "remaining " + str(len(recommended_tracks))
+    return recommended_tracks
+
+def recommended_tracks_for_album(artist, album):
+    recommended_tracks = {};
+
+    album_tags = album.item.get_tags()
+    if has_tag(marker_tag, album_tags):
+        print "Found " + marker_tag
+    else:
+        album_tracks = album.item.get_tracks()
+        for track in album_tracks:
+          track_tags = track.get_tags()
+          #print "Track: " + track.get_title()
+          if not has_tag(missing_tag, track_tags):
+            #print "adding " + track.get_title()
+            recommended_tracks[track.get_title()] = track
+          else:
+            print missing_tag + "Found"
+            break
+
+        #print "=== candidate album tracks ==="
+        #print recommended_tracks_album.keys()
+
+        user_tracks = library.get_tracks(artist=artist, album=top_album.item.get_title())
+        for user_track in user_tracks:
+          if user_track.item.get_title()  in recommended_tracks:
+            if user_track.playcount > 0:
+              #print "removing " + user_track.item.get_title()
+              del recommended_tracks[user_track.item.get_title()]
+          else:
+            print "inconsistency on " +  user_track.item.get_title()
+
+    print "remaining " + str(len(recommended_tracks))
+    return recommended_tracks
+
 ## Parameters
 
+missing_tag = "missing track"
+marker_tag = "albums i have listened"
+
+artist_name =  "Zero 7"
 
 ## Main
 
@@ -78,87 +141,41 @@ if __name__ == '__main__':
   library = pylast.Library(user=username, network=network)
 
 
-  artist_name =  "The Last Shadow Puppets"
 
   # now you can use that object every where
   artist = network.get_artist(artist_name)
   #artist.shout("<3")
   print "Artist: " + artist.name
 
-  marker_tag = "albums i have listened"
-  missing_tag = "missing track"
-  missing_top_tag = "missing top track"
-
   print "=== TOP 10 ==="
-  top_10 = artist.get_top_tracks(limit=10)
-  recommended_tracks = {};
-  for track in top_10:
-    track_tags = track.item.get_tags()
-    print "Track: " + track.item.get_title()
-    if not has_tag(missing_top_tag, track_tags):
-      recommended_tracks[track.item.get_title()] = track.item
+  reco_top_tracks = recommended_tracks_for_top10(artist)
 
-  print "=== candidate tracks ==="
-  print recommended_tracks.keys()
 
-  print "=== listened ==="
-  user_tracks = library.get_tracks(artist=artist)
-  for user_track in user_tracks:
-      #try:
-        print "user track " + user_track.item.get_title()
-        if user_track.item.get_title()  in recommended_tracks:
-          if user_track.playcount > 0:
-              print "removing " + user_track.item.get_title()
-              del recommended_tracks[user_track.item.get_title()]
-      #except:
-        #print "error"
-        #print user_track.item
+  if len(reco_top_tracks) < 1:
+    print "=== TOP ALBUM ==="
+    top_albums = artist.get_top_albums(limit=5)
+    for top_album in top_albums:
+      print "Album: " + top_album.item.get_title()
+      reco_album_tracks = recommended_tracks_for_album(artist, top_album)
+      if (len(reco_album_tracks) > 0):
+        break
 
-  print "=== recommended ==="
-  print recommended_tracks.keys()
 
-  print "=== tagging ==="
-  for rec_title, rec_track in recommended_tracks.iteritems():
-    print "tagging " + rec_track.get_title()
-    rec_track.add_tag(missing_top_tag)
+  print "=== Tagging one ==="
+  if len(reco_top_tracks) > 0:
+     #print reco_top_tracks
+     reco = reco_top_tracks[reco_top_tracks.keys()[0]]
+     print "tagging in top 10 " + reco.get_title()
+     reco.add_tag(missing_tag)
+  else:
+     if len(reco_album_tracks) > 0:
+       reco = reco_album_tracks[reco_album_tracks.keys()[0]]
+       print "tagging in album " + reco.get_title()
+       reco.add_tag(missing_tag)
+     else:
+       print "no tag"
 
-  print "=== TOP ALBUM ==="
-  top_albums = artist.get_top_albums(limit=1)
-  for top_album in top_albums:
-    print "Album: " + top_album.item.get_title()
-    album_tags = top_album.item.get_tags()
-    print "Tags "
-    print album_tags
-    if has_tag(marker_tag, album_tags):
-        print "Found " + marker_tag
-    else:
-        album_tracks = top_album.item.get_tracks()
-        recommended_tracks = {};
-        for track in album_tracks:
-          track_tags = track.get_tags()
-          print "Track: " + track.get_title()
-          if not has_tag(missing_tag, track_tags):
-            recommended_tracks[track.get_title()] = track
 
-        print "=== candidate album tracks ==="
-        print recommended_tracks.keys()
-
-        print "=== listened ==="
-        user_tracks = library.get_tracks(artist=artist, album=top_album.item.get_title())
-        for user_track in user_tracks:
-          if user_track.item.get_title()  in recommended_tracks:
-            if user_track.playcount > 0:
-              print "removing " + user_track.item.get_title()
-              del recommended_tracks[user_track.item.get_title()]
-          else:
-            print "inconsistency on " +  user_track.item.get_title()
-
-        print "=== recommended ==="
-        print recommended_tracks.keys()
-        print "=== tagging ==="
-        for rec_title, rec_track in recommended_tracks.iteritems():
-          print "tagging " + rec_track.get_title()
-          rec_track.add_tag(missing_tag)
 
 #track = network.get_track("Iron Maiden", "The Nomad")
 #track.love()
