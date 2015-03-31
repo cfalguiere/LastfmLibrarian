@@ -74,10 +74,15 @@ def recommended_tracks_for_top10(artist):
         print missing_tag + "Found"
         break
 
+    #print recommended_tracks.keys()
+
     if len(recommended_tracks) > 0:
+      print "looking for listened tracks "
       user_tracks = library.get_tracks(artist=artist)
       for user_track in user_tracks:
-        if user_track.item.get_title()  in recommended_tracks:
+        #print "found " + user_track.item.get_title()
+        if user_track.item.get_title()  in recommended_tracks.keys():
+          #print "match " + user_track.item.get_title()
           if user_track.playcount > 0:
             #print "removing " + user_track.item.get_title()
             del recommended_tracks[user_track.item.get_title()]
@@ -108,7 +113,7 @@ def recommended_tracks_for_album(artist, album):
 
         user_tracks = library.get_tracks(artist=artist, album=top_album.item.get_title())
         for user_track in user_tracks:
-          if user_track.item.get_title()  in recommended_tracks:
+          if user_track.item.get_title()  in recommended_tracks.keys():
             if user_track.playcount > 0:
               #print "removing " + user_track.item.get_title()
               del recommended_tracks[user_track.item.get_title()]
@@ -123,7 +128,7 @@ def recommended_tracks_for_album(artist, album):
 missing_tag = "missing track"
 marker_tag = "albums i have listened"
 
-artist_name =  "Zero 7"
+artist_name =  "Massive Attack"
 
 ## Main
 
