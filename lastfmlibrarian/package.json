@@ -1,0 +1,25 @@
+{
+  "name": "lastfmlibrarian",
+  "version": "0.0.0",
+  "description": "Utilities to manage the Last.FM Library and tags",
+  "main": "index.js",
+  "dependencies": {
+    "jasmine-node": "~1.14.5"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "node_modules/.bin/jasmine-node spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cfalguiere/LastfmLibrarian"
+  },
+  "keywords": [
+    "last.fm"
+  ],
+  "author": "Claude Falguiere (https://github.com/cfalguiere)",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/cfalguiere/LastfmLibrarian/issues"
+  }
+}
