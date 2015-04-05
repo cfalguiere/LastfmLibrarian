@@ -1,0 +1,7 @@
+{
+  "api" : { "api_key" : "TODO_ENTER_YOURS_HERE",
+            "secret" : "TODO_ENTER_YOURS_HERE" },
+  "user" : { "username" : "TODO_ENTER_YOURS_HERE",
+             "password_hash" : "TODO_ENTER_YOURS_HERE" }
+}
+

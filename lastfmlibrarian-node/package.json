@@ -4,9 +4,12 @@
   "description": "Utilities to manage the Last.FM Library and tags",
   "main": "index.js",
   "dependencies": {
+    "lastfmapi": "0.0.6",
+    "promise": "~6.1.0"
+  },
+  "devDependencies": {
     "jasmine-node": "~1.14.5"
   },
-  "devDependencies": {},
   "scripts": {
     "test": "node_modules/.bin/jasmine-node spec"
   },
