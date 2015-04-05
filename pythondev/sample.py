@@ -128,7 +128,7 @@ def recommended_tracks_for_album(artist, album):
 missing_tag = "missing track"
 marker_tag = "albums i have listened"
 
-artist_name =  "Massive Attack"
+artist_name =  "Portishead"
 
 ## Main
 
