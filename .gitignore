@@ -108,3 +108,5 @@ bower_components
 
 # user credentials
 my_setup_user.bash
+lastfm_config.json
+
