@@ -10,6 +10,7 @@ var LastfmAPI = require('lastfmapi');
 var Promise = require('promise');
 
 var session = null;
+var username = null;
 
 function createSession(appkey) {
   // Set up the session
@@ -34,8 +35,17 @@ function verifySession() {
   });
 }
 
+function registerUser(userCredentials) {
+  session.setSessionCredentials(userCredentials.username, userCredentials.key);
+  username = userCredentials.username;
+}
+
+function registeredUser() {
+  return username;
+}
 
 
+// Public
 
 function findTopTenOfArtist(artistName) {
   return new Promise(function(resolve, reject) {
@@ -49,19 +59,21 @@ function findTopTenOfArtist(artistName) {
   });
 }
 
-function selectTrackUserPlaycount(artistName, trackName, username) {
+// Authenticated
+
+function findUserTrackInfo(artistName, trackName) {
   return new Promise(function(resolve, reject) {
         session.track.getInfo(
           { artist : artistName, track : trackName, autocorrect: 1,
-           username : username
-          }, function (err, track) {
-                if (err) { console.log(err); /*reject(err);*/ }
-                resolve( { artist: track.artist.name,
-                           track: track.name,
-                           userplaycount : track.userplaycount } );
+            username : username
+          }, function (err, trackInfo ) {
+                if (err) { reject(err); }
+                resolve( trackInfo );
               });
     });
  }
+
+
 
 function selectTrackUserTags(artistName, trackName, username) {
   return new Promise(function(resolve, reject) {
@@ -80,40 +92,16 @@ function selectTrackUserTags(artistName, trackName, username) {
 
 
 
-function getTrackInfo(artistName, trackName, callback) {
-  var requiredTrack;
-
-  // Set up the session
-  var lfm = new LastfmAPI({
-      'api_key' : '57e2d341a8664296206b920a55be84c5', //'MY_API_KEY', // REPLACE WITH YOUR OWN
-      'secret' : 'b23c2d43c9844c9d23763b8e4428b41b' //'MY_API_SECRET' // REPLACE WITH YOUR OWN
-  });
-
-  // Get track info
-  var track = lfm.track.getInfo(
-      {
-        'artist' : artistName,
-        'track' : trackName,
-      },
-        callback
-      /*
-      function (err, track) {
-        if (err) { console.log(err); throw err; }
-        console.log("received track");
-        console.log(track);
-        requiredTrack = track;
-      }*/
-      );
-  return track;
-};
-
 module.exports = {
   twice : twice,
   echo : echo,
   getTrackInfo : getTrackInfo,
   createSession : createSession,
   verifySession : verifySession,
+  registerUser : registerUser,
+  registeredUser : registeredUser,
   findTopTenOfArtist : findTopTenOfArtist,
+  findUserTrackInfo : findUserTrackInfo,
   selectTrackUserPlaycount : selectTrackUserPlaycount,
   selectTrackUserTags : selectTrackUserTags
 };
