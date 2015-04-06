@@ -5,10 +5,10 @@ describe("Librarian", function () {
   var Promise = require('promise');
   var fs = require('fs');
 
-  var lastfmConfig = null;
+  var session = null;
 
   beforeEach(function() {
-      if (lastfmConfig != null)
+      if (session != null)
         return;
 
       var configFileName = 'lastfm_config.json';
@@ -22,7 +22,11 @@ describe("Librarian", function () {
         expect(tmpConfig.api.secret).toBeDefined();
         expect(tmpConfig.api.secret.length).toBeGreaterThan(10);
 
-        lastfmConfig = tmpConfig;
+        var appkey = tmpConfig.api;
+
+        session = librarian.createSession(appkey);
+        expect( session.api.api_key ).toBe(appkey.api_key);
+        expect( session.api.secret ).toBe(appkey.secret);
 
       }
       catch (e) {
@@ -34,70 +38,33 @@ describe("Librarian", function () {
   });
 
 
-  describe("CreateSession", function () {
 
-    it("should show the session apikey", function () {
-      var appkey = {
-        'api_key' : 'MY_API_KEY',
-        'secret' : 'MY_API_SECRET'
-      }
-      var session = librarian.createSession(appkey);
-      expect( session.api.api_key ).toBe(appkey.api_key);
-      expect( session.api.secret ).toBe(appkey.secret);
-    });
+  describe("findTopTenOfArtist", function () {
 
-  });
+    it("should return 10 tracks", function () {
 
-  describe("VerifySession", function () {
+      expect( session ).not.toBeNull();
 
-    it("should succeed", function () {
+      var artistName = "Portishead";
 
-      expect( lastfmConfig ).not.toBeNull();
-      var appkey = lastfmConfig.api
-
-      var session = librarian.createSession(appkey);
-      expect( session.api.api_key ).toBe(appkey.api_key);
-      expect( session.api.secret ).toBe(appkey.secret);
-
+      var top = null;
       var done = false;
-      var status = false;
-      librarian.verifySession().then(function (res){
-        status = res;
+      librarian.findTopTenOfArtist(artistName).then( function (res){
+        top = res;
         done = true;
-      })
-
-      waitsFor(function() {
-        return done;
-      }, "Timed out", 5000);
-
-      runs(function() {
-        expect( status ).toBe( true );
+      }).catch(function(e) {
+        console.log("Exception when calling findTopTenOfArtist");
+        console.log(e);
+        done = true;
       });
 
-    });
-
-    it("should succeed", function () {
-      var appkey = {
-        'api_key' : 'WRONG_API_KEY',
-        'secret' : 'WRONG_API_SECRET'
-      }
-      var session = librarian.createSession(appkey);
-      expect( session.api.api_key ).toBe(appkey.api_key);
-      expect( session.api.secret ).toBe(appkey.secret);
-
-      var done = false;
-      var status = true;
-      librarian.verifySession().then(function (res){
-        status = res;
-        done = true;
-      })
-
       waitsFor(function() {
         return done;
-      }, "Timed out", 5000);
+      }, "Timed out", 10000);
 
       runs(function() {
-        expect( status ).toBe( false );
+        expect( top ).not.toBeNull();
+        expect( top.track.length ).toBe(10);
       });
 
     });

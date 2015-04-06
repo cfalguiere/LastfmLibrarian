@@ -24,7 +24,7 @@ function verifySession() {
 
     if (session != null) {
       session.chart.getTopTracks( { page : 0, limit: 1 }, function (err, chart) {
-        if (err) { console.log(err); resolve(false); }
+        if (err) { /*console.log(err);*/ resolve(false); }
         resolve(true);
       });
     } else {
@@ -33,6 +33,50 @@ function verifySession() {
 
   });
 }
+
+
+
+
+function findTopTenOfArtist(artistName) {
+  return new Promise(function(resolve, reject) {
+      session.artist.getTopTracks(
+        { artist : artistName, autocorrect: 1,
+          page: 0, limit: 10
+        }, function (err, top) {
+          if (err) { /*console.log(err);*/ reject(err); }
+            resolve(top);
+        });
+  });
+}
+
+function selectTrackUserPlaycount(artistName, trackName, username) {
+  return new Promise(function(resolve, reject) {
+        session.track.getInfo(
+          { artist : artistName, track : trackName, autocorrect: 1,
+           username : username
+          }, function (err, track) {
+                if (err) { console.log(err); /*reject(err);*/ }
+                resolve( { artist: track.artist.name,
+                           track: track.name,
+                           userplaycount : track.userplaycount } );
+              });
+    });
+ }
+
+function selectTrackUserTags(artistName, trackName, username) {
+  return new Promise(function(resolve, reject) {
+        session.track.getTags(
+          { artist : artistName, track : trackName, autocorrect: 1,
+           user : username
+          }, function (err, tags) {
+                if (err) { console.log(err); reject(err); }
+                else { resolve( { artist: artistName,
+                           track: trackName,
+                           tags : tags.tag } );
+                     }
+              });
+    });
+ }
 
 
 
@@ -68,5 +112,8 @@ module.exports = {
   echo : echo,
   getTrackInfo : getTrackInfo,
   createSession : createSession,
-  verifySession : verifySession
+  verifySession : verifySession,
+  findTopTenOfArtist : findTopTenOfArtist,
+  selectTrackUserPlaycount : selectTrackUserPlaycount,
+  selectTrackUserTags : selectTrackUserTags
 };
